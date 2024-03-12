@@ -1,0 +1,17 @@
+Running in mode NCS.
+Found 6-fold (6.00813002166293) symmetric complex at chain B
+  translation error = 0.317454453023004
+Found a total of 6 monomers in the symmetric complex.
+Placing 7 virtual residues.
+ Adding interface '0'
+ Adding interface '5'
+ Adding interface '1'
+ Adding interface '2'
+ Adding interface '3'
+ Adding interface '4'
+Writing interface 0 as chain A
+Writing interface 1 as chain B
+Writing interface 2 as chain C
+Writing interface 3 as chain D
+Writing interface 4 as chain E
+Writing interface 5 as chain F

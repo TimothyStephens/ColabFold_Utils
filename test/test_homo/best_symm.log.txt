@@ -1,0 +1,2 @@
+Running in mode NCS.
+Chain B not in input!
