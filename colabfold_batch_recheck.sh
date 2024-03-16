@@ -89,7 +89,7 @@ else
 fi
 
 #### Run colabfold_search
-log "singularity exec /scratch/singularity/ColabFold_v1.5.5_cuda_v12.1.0-rev1.sif colabfold_batch $@"
+run_cmd "ColabFold_v1.5.5_cuda_v12.1.0-rev1.sif colabfold_batch $@"
 
 
 #### Check if colabfold_batch finished correctly
