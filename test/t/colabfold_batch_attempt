@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+set +eu
+
+
+## Set envs
+retry_count=0         # Current attempt
+retry_max=10          # Max number of times to retry running command
+retry_wait_seconds=30 # Number of seconds to wait intially, then retry_wait_seconds * retry_count after
+## Set envs using global overwrites
+if [[ ! -z $RETRY_MAX_ATTEMPTS ]]; then retry_max=$RETRY_MAX_ATTEMPTS; fi
+if [[ ! -z $RETRY_WAIT_SECONDS ]]; then retry_wait_seconds=$RETRY_WAIT_SECONDS; fi
+
+
+## Usage
+usage() {
+echo -e "##
+## $(basename ${0})
+##
+
+Wrapper script which attempts to get colabfold_batch to finish correctly
+by waiting random amounts of time between attempts to try and negate random
+CUDA/Tensorflow startup issues.
+
+Usage: 
+./$(basename $0) -f protein.fa
+
+Options:
+--retry_max                Max number of times to retry running command (default: $retry_max).
+--retry_wait_seconds       Number of seconds to wait intially, then retry_wait_seconds * retry_count after (default: $retry_wait_seconds)
+
+-h, --help                 This help message + colabfold_batch help message
+--debug                    Run debug mode
+
+## colabfold_batch help message
+" 1>&2
+}
+
+
+
+# See https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+set +eu
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+    --retry_max)
+      retry_max="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    --retry_wait_seconds)
+      retry_wait_seconds="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -h|--help)
+      usage
+      ;;
+    --debug)
+      set -x
+      shift # past argument
+      ;;
+    -*) # unknown flagged option
+      POSITIONAL+=("$1") # save it in an array for later
+      POSITIONAL+=("$1") # save it in an array for later
+      shift # past argument
+      shift # past value
+      ;;
+    *) # unknown positional option
+      POSITIONAL+=("$1") # save it in an array for later
+      OUTDIR="$1" # Assume last positional argument is "results" dir
+      shift # past argument
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+while [[ $retry_count -lt $retry_max ]];
+do
+	# Wait random time before trying again (increase possible random time as we keep attempting)
+	if [[ $retry_count -ne 0 ]];
+	then
+		random_wait_seconds=$(( ( RANDOM % (retry_wait_seconds * retry_count) )  + 1 ))
+		log "COMMAND DIDNT APPEAR TO FINISH CORRECTLY! WAITING $random_wait_seconds SECONDS BEFORE RETRYING"
+		sleep $random_wait_seconds
+	fi
+	
+	retry_count=$((retry_count + 1))
+	log "RUN ATTEMPT $retry_count/$retry_max"
+	
+	# Run command and check exit status
+	echo "colabfold_batch $@"
+	ret=$?
+	if [[ "$ret" -ne 0 ]]; then continue; fi
+	
+	# Check if output dir was created (wont exist if colabfold_batch failed during library loading)
+	if [[ ! -d "${OUTDIR}" ]]; then continue; fi
+	
+	# Get *.a3m files in output results dir and check if each has a *.done.txt file
+	#  - The presence of the *.done.txt file signifies that script reached the end of its run.
+	
+	# Check if any *.a3m files were found
+	if [[ $(find ${OUTDIR} -name "*.a3m" | wc -l) -eq 0 ]]; then continue; fi
+	# For each *.a3m file, check if *.done.txt file exists
+	for A3M in $(find ${OUTDIR} -name "*.a3m");
+	do
+		if [[ ! -e "${A3M%*.a3m}.done.txt" ]]; then continue 2; fi
+	done
+	
+	# Exit function if we made it this far
+	log "COMMAND FINISHED AFTER $retry_count ATTEMPTS"
+	exit 0
+done
+# Looks like we failed
+log "COMMAND FAILED AFTER $retry_count ATTEMPTS"
+set -eu
+exit 1
+
