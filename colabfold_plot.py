@@ -232,7 +232,7 @@ viewer <- m_grid(
 )
 
 ## Create interactive results HTML
-legend <- htmltools::img(src = knitr::image_uri("Plot_AlphaFold2-legend.png"), 
+legend <- htmltools::img(src = knitr::image_uri("AlphaFold2-legend.png"), 
                          alt = "logo", 
                          style = paste('float: bottom;padding-bottom:0px;height:',40*4,'px;width:',160*4,'px', sep="")
                          )
