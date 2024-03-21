@@ -70,9 +70,9 @@ def colabfold_predict_homomerization(results, oligomerization):
 		
 		# Run 'make_symmdef_file.pl' to predict symmetry
 		#  - FROM: https://files.ipd.uw.edu/krypton/make_symmdef_file.pl
-		make_symmdef_file = Path('make_symmdef_file.pl')
+		make_symmdef_file = Path(os.path.dirname(os.path.realpath(__file__)) + '/make_symmdef_file.pl')
 		if not make_symmdef_file.exists():
-			raise OSError(f"Cant find {make_symmdef_file}, please download from https://files.ipd.uw.edu/krypton/make_symmdef_file.pl")
+			raise OSError(f"Cant find make_symmdef_file.pl, please download from https://files.ipd.uw.edu/krypton/make_symmdef_file.pl")
 		cmd = f"perl {make_symmdef_file} -m NCS -p {ini_pdb} 2> {sym_log} 1> {sym_def}"
 		logging.debug(f"Running cmd: {cmd}") ## DEBUG
 		ret = os.system(cmd)
