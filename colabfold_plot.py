@@ -79,7 +79,7 @@ options(scipen = 999) #Prevent scientific notation
 
 '''
 
-RMD_3D_PLOT_CONFIDENCE_LEGEND=os.path.dirname(os.path.abspath(__file__))+"/Plot_AlphaFold2-legend.png"
+RMD_3D_PLOT_CONFIDENCE_LEGEND=os.path.dirname(os.path.abspath(__file__))+"/AlphaFold2-legend.png"
 
 RMD_3D_PLOT_CONFIDENCE='''
 # Protein 3D structure
@@ -122,7 +122,7 @@ viewer <- r3dmol(
 # - Color by by chain (i.e., we have a multimeric complex; color each protein in complex as a separate color)
 
 ## Create interactive results HTML
-legend <- htmltools::img(src = knitr::image_uri("Plot_AlphaFold2-legend.png"), 
+legend <- htmltools::img(src = knitr::image_uri("AlphaFold2-legend.png"), 
                          alt = "logo", 
                          style = paste('float: bottom;padding-bottom:0px;height:',40*4,'px;width:',160*4,'px', sep="")
                          )
