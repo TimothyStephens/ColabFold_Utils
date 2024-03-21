@@ -32,7 +32,7 @@ which makes it challenging to know if all your jobs finished correctly. This wra
 the presence of the correct output files, which should make this analysis more robust and scriptable.
 
 Usage: 
-$(basename $0) --OUTDIR_TO_CHECK results colabfold_batch [options] input results
+$(basename $0) --OUTDIR_TO_CHECK results [colabfold_batch options] input results
 
 Options:
 --OUTDIR                   colabfold_batch results directory to check for completness (Required)
@@ -89,7 +89,7 @@ else
 fi
 
 #### Run colabfold_search
-run_cmd "ColabFold_v1.5.5_cuda_v12.1.0-rev1.sif colabfold_batch $@"
+run_cmd "colabfold_batch $@"
 
 
 #### Check if colabfold_batch finished correctly
