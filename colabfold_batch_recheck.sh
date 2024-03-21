@@ -35,7 +35,7 @@ Usage:
 $(basename $0) --OUTDIR_TO_CHECK results [colabfold_batch options] input results
 
 Options:
---OUTDIR                   colabfold_batch results directory to check for completness (Required)
+--OUTDIR_TO_CHECK          The 'results' directory passed to colabfold_batch to check for completness (Required)
 
 -h, --help                 This help message
 --debug                    Run debug mode
