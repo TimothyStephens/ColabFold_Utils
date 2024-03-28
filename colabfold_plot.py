@@ -35,6 +35,10 @@ def main():
 		type=str, 
 		help='HTML files output directory.'
 	)
+	parser.add_argument('--all_chains',
+		required=False, action='store_true',
+		help='Calculate quality stats using all chains, not just chain A (default), this makes sense if you have a heteromeric complex but not so much for homomeric complexes (default: %(default)s)'
+	)
 	parser.add_argument('--dont_keep_files',
 		required=False, action='store_true',
 		help='Dont keep images, PDB, and Rmd files used for plotting; makes "plots" dir smaller but prevents rebuilding of Rmd file (default: %(default)s)'
@@ -53,7 +57,7 @@ def main():
 	
 	logging.debug('%s', args) ## DEBUG
 	
-	colabfold_plot(args.results, args.plots, args.dont_keep_files)
+	colabfold_plot(args.results, args.plots, args.all_chains, args.dont_keep_files)
 
 RMD_HEADER='''---
 title: "AlphaFold2 Structure of <<<PROTEIN_ID>>>"
@@ -265,7 +269,7 @@ sessionInfo()
 '''
 
 
-def colabfold_plot(results, plots, dont_keep_files):
+def colabfold_plot(results, plots, all_chains, dont_keep_files):
 	# Create output directory
 	os.makedirs(plots, exist_ok=True)
 	
@@ -293,14 +297,26 @@ def colabfold_plot(results, plots, dont_keep_files):
 		b_sum       = 0
 		
 		shutil.copyfile(in_pdb_file, out_pdb)
+		current_residue_number = ''
 		for line in open(out_pdb, "r").readlines():
 			if line.startswith('ATOM'):
-				current_chain = line[21]
+				current_chain  = line[21]
+				residue_number = line[22:26]
+				
+				# Skip entry if we have already seen an atom from this residue before (assume all atoms have same b-factor value)
+				if current_residue_number == residue_number:
+					continue
+				else:
+					current_residue_number = residue_number
+				
+				# Check which chain we are on (normally just chain 'A', but can be higher if multimeric protein)
 				if previous_chain != current_chain:
 					previous_chain = current_chain
 					copies += 1
 				
-				if current_chain == 'A':
+				# Count b-factor values for just A chain, or all chains if all_chains==True
+				#  - Using all chains will inflate length if we have homodimers but makes sense if we have heterodimers.
+				if current_chain == 'A' or all_chains:
 					b_factor = float(line[60:66])
 					b_sum += b_factor
 					count_total += 1
