@@ -61,7 +61,7 @@ def main():
     
     logging.debug('%s', args) ## DEBUG
     
-    colabfold_plot(args.results, args.plots, args.colabfold, rgs.all_chains, args.dont_keep_files)
+    colabfold_plot(args.results, args.plots, args.colabfold, args.all_chains, args.dont_keep_files)
 
 RMD_HEADER='''---
 title: "AlphaFold2 Structure of <<<PROTEIN_ID>>>"
