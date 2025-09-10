@@ -35,9 +35,9 @@ def main():
         type=str, 
         help='HTML files output directory.'
     )
-    parser.add_argument('--all_pdb_files',
+    parser.add_argument('--colabfold',
         required=False, action='store_true',
-        help='Plot all PDB files in a directory. Default assumption is that a directory is the output from ColabFold and we want to plot just the best one (default: %(default)s)'
+        help='Directory is ColabFold output and we want to plot just the best PDB file (default: %(default)s)'
     )
     parser.add_argument('--all_chains',
         required=False, action='store_true',
@@ -61,7 +61,7 @@ def main():
     
     logging.debug('%s', args) ## DEBUG
     
-    colabfold_plot(args.results, args.plots, args.all_pdb_files, rgs.all_chains, args.dont_keep_files)
+    colabfold_plot(args.results, args.plots, args.colabfold, rgs.all_chains, args.dont_keep_files)
 
 RMD_HEADER='''---
 title: "AlphaFold2 Structure of <<<PROTEIN_ID>>>"
@@ -273,12 +273,12 @@ sessionInfo()
 '''
 
 
-def colabfold_plot(results, plots, all_pdb_files, all_chains, dont_keep_files):
+def colabfold_plot(results, plots, colabfold, all_chains, dont_keep_files):
     # Create output directory
     os.makedirs(plots, exist_ok=True)
     
     # For each PDB file that we have found
-    for prefix, in_pdb_file, in_cov_file, in_pae_file, in_plddt_file in get_files_for_plotting(results, all_pdb_files):
+    for prefix, in_pdb_file, in_cov_file, in_pae_file, in_plddt_file in get_files_for_plotting(results, colabfold):
         prefix = os.path.basename(prefix) # Remove directory name from prefix
         logging.info(f"Processing: {in_pdb_file}; Output Prefix: {prefix}") ## INFO
         
@@ -458,11 +458,11 @@ def colabfold_plot(results, plots, all_pdb_files, all_chains, dont_keep_files):
 
 
 
-def get_files_for_plotting(input_path, all_pdb_files):
+def get_files_for_plotting(input_path, colabfold):
     '''
     Read one of:
-      1) directory with colabfold_batch PDB files;
-      2) directory with PDB files to plot (if --all_pdb_files set);
+      1) directory with colabfold_batch PDB files (if --colabfold set);
+      2) directory with PDB files to plot;
       3) a specific PDB file;
     '''
     
@@ -489,7 +489,7 @@ def get_files_for_plotting(input_path, all_pdb_files):
         assert input_path.is_dir(), "Expected either an input file or a input directory"
         
         # Run in PDB or A3M modes
-        if all_pdb_files:
+        if not colabfold:
             # Plot all PDB files
             for file in sorted(input_path.iterdir()):
                 if not file.is_file():
